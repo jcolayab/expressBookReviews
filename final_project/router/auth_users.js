@@ -40,34 +40,6 @@ regd_users.post("/login", (req,res) => {
   }
 });
 
-// DELETE route: User can only delete their own review
-regd_users.delete("/auth/review/:isbn", (req, res) => {
-  const isbn = req.params.isbn;
-
-  // 🛡️ Validate session and username
-  const sessionUser = req.session?.authorization?.username;
-  if (!sessionUser) {
-    return res.status(403).json({ message: "Unauthorized. Please log in first." });
-  }
-
-  // 📚 Check if book and review exist
-  const book = books[isbn];
-  if (!book) {
-    return res.status(404).json({ message: "Book not found." });
-  }
-
-  if (!book.reviews || !book.reviews[sessionUser]) {
-    return res.status(404).json({ message: "No review found for this user under the given ISBN." });
-  }
-
-  // Remove the review
-  delete book.reviews[sessionUser];
-
-  res.status(200).json({
-    message: `Review by '${sessionUser}' for ISBN ${isbn} deleted successfully.`
-  });
-});
-
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
@@ -108,6 +80,34 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     isbn,
     reviewer: sessionUser,
     review: reviewText
+  });
+});
+
+// DELETE route: User can only delete their own review
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+  const isbn = req.params.isbn;
+
+  // 🛡️ Validate session and username
+  const sessionUser = req.session?.authorization?.username;
+  if (!sessionUser) {
+    return res.status(403).json({ message: "Unauthorized. Please log in first." });
+  }
+
+  // 📚 Check if book and review exist
+  const book = books[isbn];
+  if (!book) {
+    return res.status(404).json({ message: "Book not found." });
+  }
+
+  if (!book.reviews || !book.reviews[sessionUser]) {
+    return res.status(404).json({ message: "No review found for this user under the given ISBN." });
+  }
+
+  // Remove the review
+  delete book.reviews[sessionUser];
+
+  res.status(200).json({
+    message: `Review by '${sessionUser}' for ISBN ${isbn} deleted successfully.`
   });
 });
 
